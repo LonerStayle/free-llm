@@ -1,0 +1,18 @@
+# Dart / Flutter 빌드 산출물·캐시
+.dart_tool/
+.packages
+build/
+pubspec.lock
+coverage/
+.flutter-plugins
+.flutter-plugins-dependencies
+# 키가 들어갈 수 있는 파일 (커밋 금지)
+.env
+.env.*
+local.properties
+*.xcconfig
+# 기타
+node_modules/
+.DS_Store
+.idea/
+*.iml

@@ -1,0 +1,7 @@
+# live: 실제 제공처 호출 (spec/live-smoke.md). OPENROUTER_API_KEY 가 없으면 "LIVE SKIP" 을 찍고 skip.
+#   따로 돌리기: OPENROUTER_API_KEY=... dart test --tags live   (flutter test --tags live 도 같다)
+#   키를 export 해 둔 셸에서 일반 테스트만 돌리려면: dart test -x live
+# slow: 약 16초 걸리는 http 케이스 (SPEC 8.2). FLR_SLOW=1 일 때만 돈다(아니면 SKIP 표시).
+tags:
+  live:
+  slow:

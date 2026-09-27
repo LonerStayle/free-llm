@@ -1,0 +1,40 @@
+{
+  "name": "free-llm-router",
+  "version": "0.1.0",
+  "description": "앱 안에서 무료 LLM 제공처를 폴백하며 호출하는 라우터 (React Native, 순수 TypeScript)",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "react-native": "dist/index.js",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": false,
+  "license": "UNLICENSED",
+  "private": true,
+  "scripts": {
+    "clean": "node -e \"for (const d of ['dist','build']) require('fs').rmSync(d,{recursive:true,force:true})\"",
+    "build": "tsc -p tsconfig.json",
+    "build:test": "tsc -p tsconfig.test.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.test.json --noEmit",
+    "pretest": "npm run build && npm run build:test",
+    "test": "node --test --test-reporter=spec build/__tests__/unit.test.js build/__tests__/conformance.test.js",
+    "conformance": "npm run build && npm run build:test && node build/__tests__/run-conformance.js",
+    "test:slow": "npm run build && npm run build:test && FLR_SLOW=1 node --test --test-reporter=spec build/__tests__/conformance.test.js",
+    "test:live": "npm run build && npm run build:test && node --test --test-reporter=spec build/__tests__/live-smoke.test.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "devDependencies": {
+    "@types/node": "22.19.17",
+    "typescript": "5.8.3"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022"],
+    "types": ["node"],
+    "rootDir": ".",
+    "outDir": "build",
+    "declaration": false,
+    "exactOptionalPropertyTypes": false
+  },
+  // 테스트는 패키지 자기참조('free-llm-router' → dist)로 빌드 결과를 가져다 쓴다.
+  "include": ["__tests__"]
+}

@@ -1,0 +1,15 @@
+# Gradle / 빌드 산출물
+.gradle/
+build/
+.kotlin/
+**/build/
+# IDE
+.idea/
+*.iml
+.DS_Store
+# 로컬 설정 (sdk.dir, 키) — 커밋 금지
+local.properties
+.env
+*.env
+# Xcode
+xcuserdata/

@@ -1,0 +1,7 @@
+# 키 파일
+.env
+# 모의 검증 결과 (--out)
+test/results*.json
+node_modules/
+__pycache__/
+.DS_Store

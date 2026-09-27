@@ -1,0 +1,17 @@
+name: free_llm_router
+description: >-
+  모바일 앱 안에서 무료 LLM 제공처(OpenAI 호환 chat/completions)를 폴백하며 호출하는 라우터.
+  Flutter SDK 의존 없는 순수 Dart. 명세는 ../spec/SPEC.md.
+version: 0.1.0
+publish_to: none
+
+environment:
+  sdk: ^3.5.0
+
+dependencies:
+  # 1.5.0+: AbortableRequest (진행 중 요청 중단)
+  http: ^1.5.0
+
+dev_dependencies:
+  lints: ^6.0.0
+  test: ^1.25.0

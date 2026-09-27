@@ -1,0 +1,87 @@
+# 앱에서 부르는 무료 모델 게이트웨이. OpenAI 호환 /v1/chat/completions 로 받는다.
+# 앱은 model 에 그룹 이름(chat, fast)만 넣는다. 실제 모델 선택·재시도·폴백은 여기서 한다.
+# 모델 목록은 claude-free-settings/config.yaml (2026-09-26) 에서 가져왔다.
+# 무료 모델은 자주 빠진다. scripts/check-models.sh 로 살아 있는지 확인한다.
+
+model_list:
+  # ── chat: 일반 대화. 품질·컨텍스트 우선 ──
+  - model_name: chat
+    litellm_params:
+      model: openrouter/nvidia/nemotron-3-ultra-550b-a55b:free   # 1M
+      api_key: os.environ/OPENROUTER_API_KEY
+      rpm: 6
+  - model_name: chat
+    litellm_params:
+      model: openrouter/nvidia/nemotron-3-super-120b-a12b:free   # 262K
+      api_key: os.environ/OPENROUTER_API_KEY
+      rpm: 6
+  - model_name: chat
+    litellm_params:
+      model: openrouter/qwen/qwen3.8-27b:free                    # 262K
+      api_key: os.environ/OPENROUTER_API_KEY
+      rpm: 4
+  - model_name: chat
+    litellm_params:
+      model: openrouter/google/gemma-4-31b-it:free               # 262K
+      api_key: os.environ/OPENROUTER_API_KEY
+      rpm: 4
+  # Requesty: 200 RPD. 가격 0 모델만 등록한다.
+  # - model_name: chat
+  #   litellm_params:
+  #     model: openai/nvidia/nemotron-3-ultra-550b-a55b
+  #     api_base: https://router.requesty.ai/v1
+  #     api_key: os.environ/REQUESTY_API_KEY
+  #     rpm: 4
+  # Mistral 기본값은 입력을 학습에 쓴다.
+  # - model_name: chat
+  #   litellm_params:
+  #     model: mistral/codestral-2508
+  #     api_key: os.environ/MISTRAL_API_KEY
+  #     rpm: 5
+
+  # ── fast: 짧은 요청(분류, 요약, 제목 생성). 응답 속도 우선 ──
+  - model_name: fast
+    litellm_params:
+      model: openrouter/nvidia/nemotron-3.5-lightning:free
+      api_key: os.environ/OPENROUTER_API_KEY
+      rpm: 4
+  - model_name: fast
+    litellm_params:
+      model: openrouter/poolside/laguna-xs-2.1:free
+      api_key: os.environ/OPENROUTER_API_KEY
+      rpm: 3
+  # Groq 는 8K TPM. max_input_tokens 를 넘는 요청은 pre_call_checks 가 다른 배포로 보낸다.
+  # - model_name: fast
+  #   litellm_params:
+  #     model: groq/openai/gpt-oss-120b
+  #     api_key: os.environ/GROQ_API_KEY
+  #     rpm: 6
+  #     tpm: 7000
+  #   model_info:
+  #     max_input_tokens: 6000
+  # Gemini 무료분은 입력을 학습에 쓴다.
+  # - model_name: fast
+  #   litellm_params:
+  #     model: gemini/gemini-3.5-flash-lite
+  #     api_key: os.environ/GEMINI_API_KEY
+  #     rpm: 3
+
+litellm_settings:
+  drop_params: true                  # 제공처가 모르는 파라미터 제거
+  modify_params: true                # 제공처 형식에 맞게 요청 보정
+  turn_off_message_logging: true     # 요청 본문을 로그에 남기지 않는다
+
+router_settings:
+  routing_strategy: simple-shuffle   # Redis 없이 동작. rpm 은 가중치이자 분당 한도 (README 모의 검증)
+  num_retries: 3
+  allowed_fails: 3                   # LiteLLM 기본값과 같아 실제로는 기본 정책(429 즉시 쿨다운 등)이 쓰인다
+  cooldown_time: 60                  # 쿨다운 길이 60초
+  enable_pre_call_checks: true       # context_window_fallbacks 에 필요
+  fallbacks:
+    - chat: ["fast"]
+    - fast: ["chat"]
+  context_window_fallbacks:
+    - fast: ["chat"]
+
+general_settings:
+  master_key: os.environ/LITELLM_MASTER_KEY

@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "free-llm-router/spec/models.schema.json",
+  "title": "free-llm-router 모델 목록",
+  "description": "providers + groups + settings. 키 값은 넣지 않는다 (keyName 은 이름만). SPEC.md 6절. 저장소 파일 검증용이라 parseConfig 보다 엄격하다(모르는 키 거부). parseConfig 는 모르는 키를 무시한다.",
+  "type": "object",
+  "required": ["providers", "groups"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "version": { "type": "integer", "enum": [1] },
+    "updated": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+    "description": { "type": "string" },
+    "providers": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/provider" } },
+    "groups": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": { "pattern": "^[a-z][a-z0-9_-]*$" },
+      "additionalProperties": { "$ref": "#/$defs/group" }
+    },
+    "settings": { "$ref": "#/$defs/settings" }
+  },
+  "$defs": {
+    "provider": {
+      "type": "object",
+      "required": ["id", "baseUrl"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9_-]*$" },
+        "baseUrl": { "type": "string", "pattern": "^https?://" },
+        "keyName": { "type": "string", "pattern": "^[A-Z][A-Z0-9_]*$" },
+        "extraHeaders": {
+          "type": "object",
+          "propertyNames": {
+            "not": { "pattern": "^([Aa][Uu][Tt][Hh][Oo][Rr][Ii][Zz][Aa][Tt][Ii][Oo][Nn]|[Cc][Oo][Nn][Tt][Ee][Nn][Tt]-[Tt][Yy][Pp][Ee])$" }
+          },
+          "additionalProperties": { "type": "string" }
+        },
+        "note": { "type": "string" }
+      }
+    },
+    "group": {
+      "type": "object",
+      "required": ["deployments"],
+      "additionalProperties": false,
+      "properties": {
+        "description": { "type": "string" },
+        "deployments": { "type": "array", "items": { "$ref": "#/$defs/deployment" } }
+      }
+    },
+    "deployment": {
+      "type": "object",
+      "required": ["id", "provider", "model", "rpm"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._-]*$" },
+        "provider": { "type": "string" },
+        "model": { "type": "string", "minLength": 1 },
+        "rpm": { "type": "integer", "minimum": 1, "maximum": 2147483647 },
+        "maxInputTokens": { "type": "integer", "minimum": 1, "maximum": 2147483647 },
+        "enabled": { "type": "boolean" },
+        "note": { "type": "string" }
+      }
+    },
+    "groupMap": {
+      "type": "object",
+      "additionalProperties": { "type": "array", "items": { "type": "string" } }
+    },
+    "settings": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "numRetries": { "type": "integer", "minimum": 0, "maximum": 2147483647 },
+        "allowedFails": { "type": "integer", "minimum": 1, "maximum": 2147483647 },
+        "cooldownSeconds": { "type": "number", "exclusiveMinimum": 0 },
+        "timeoutSeconds": { "type": "number", "exclusiveMinimum": 0 },
+        "fallbacks": { "$ref": "#/$defs/groupMap" },
+        "contextWindowFallbacks": { "$ref": "#/$defs/groupMap" }
+      }
+    }
+  }
+}

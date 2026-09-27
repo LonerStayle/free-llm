@@ -1,0 +1,15 @@
+services:
+  litellm:
+    # v1.101.0 digest 고정 (claude-free-settings 와 같은 이미지). latest 는 쓰지 않는다.
+    image: ghcr.io/berriai/litellm@sha256:d295634e09c648dcdb72c4cc2dd226f5fb87823a73e88cbbed6f205e4deb044b
+    container_name: free-llm-gateway
+    restart: unless-stopped
+    ports:
+      # 기본은 이 맥에서만 접근 (에뮬레이터 10.0.2.2, adb reverse 는 이걸로 충분).
+      # 같은 Wi-Fi 의 실기기에서 부르려면 .env 에 BIND_ADDR=0.0.0.0
+      # claude-free-settings 프록시(4000)와 동시에 띄울 수 있게 4100 을 쓴다.
+      - "${BIND_ADDR:-127.0.0.1}:4100:4000"
+    env_file: .env
+    volumes:
+      - ./config.yaml:/app/config.yaml:ro
+    command: ["--config", "/app/config.yaml"]

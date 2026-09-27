@@ -1,0 +1,38 @@
+# 모의 제공처(spec/mock-server)로 LiteLLM 동작을 확인하는 설정. 실제 키·실제 제공처 없음.
+# router_settings·litellm_settings 는 ../config.yaml 과 같다. model_list 만 모의 서버로 바꿨다.
+# rpm(가중치)과 그룹 구성도 원래 설정과 같다 (chat 6/6/4/4, fast 4/3).
+# MOCK_API_BASE 는 run-mock.sh 가 넣는다 (예: http://host.docker.internal:PORT/p1).
+
+model_list:
+  - model_name: chat
+    litellm_params: { model: openai/chat-a, api_base: os.environ/MOCK_API_BASE, api_key: mock-key, rpm: 6 }
+  - model_name: chat
+    litellm_params: { model: openai/chat-b, api_base: os.environ/MOCK_API_BASE, api_key: mock-key, rpm: 6 }
+  - model_name: chat
+    litellm_params: { model: openai/chat-c, api_base: os.environ/MOCK_API_BASE, api_key: mock-key, rpm: 4 }
+  - model_name: chat
+    litellm_params: { model: openai/chat-d, api_base: os.environ/MOCK_API_BASE, api_key: mock-key, rpm: 4 }
+  - model_name: fast
+    litellm_params: { model: openai/fast-a, api_base: os.environ/MOCK_API_BASE, api_key: mock-key, rpm: 4 }
+  - model_name: fast
+    litellm_params: { model: openai/fast-b, api_base: os.environ/MOCK_API_BASE, api_key: mock-key, rpm: 3 }
+
+litellm_settings:
+  drop_params: true
+  modify_params: true
+  turn_off_message_logging: true
+
+router_settings:
+  routing_strategy: simple-shuffle
+  num_retries: 3
+  allowed_fails: 3
+  cooldown_time: 60
+  enable_pre_call_checks: true
+  fallbacks:
+    - chat: ["fast"]
+    - fast: ["chat"]
+  context_window_fallbacks:
+    - fast: ["chat"]
+
+general_settings:
+  master_key: os.environ/LITELLM_MASTER_KEY

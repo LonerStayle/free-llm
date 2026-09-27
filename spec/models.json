@@ -1,0 +1,138 @@
+{
+  "$schema": "./models.schema.json",
+  "version": 1,
+  "updated": "2026-09-26",
+  "description": "gateway/config.yaml 에서 옮긴 목록. 키 값은 넣지 않는다. 무료 모델은 자주 빠지므로 gateway/scripts/check-models.sh 로 확인.",
+  "providers": [
+    {
+      "id": "openrouter",
+      "baseUrl": "https://openrouter.ai/api/v1",
+      "keyName": "OPENROUTER_API_KEY",
+      "extraHeaders": { "X-Title": "free-llm-router" },
+      "note": "HTTP-Referer 는 선택. 앱 URL 이 있으면 extraHeaders 에 추가"
+    },
+    {
+      "id": "requesty",
+      "baseUrl": "https://router.requesty.ai/v1",
+      "keyName": "REQUESTY_API_KEY",
+      "note": "200 RPD. 가격 0 모델만 등록"
+    },
+    {
+      "id": "groq",
+      "baseUrl": "https://api.groq.com/openai/v1",
+      "keyName": "GROQ_API_KEY",
+      "note": "무료 8K TPM"
+    },
+    {
+      "id": "gemini",
+      "baseUrl": "https://generativelanguage.googleapis.com/v1beta/openai",
+      "keyName": "GEMINI_API_KEY",
+      "note": "OpenAI 호환 엔드포인트. 모델명에 models/ 접두어 없음. 무료분은 입력을 학습에 사용"
+    },
+    {
+      "id": "mistral",
+      "baseUrl": "https://api.mistral.ai/v1",
+      "keyName": "MISTRAL_API_KEY",
+      "note": "기본값은 입력을 학습에 사용"
+    }
+  ],
+  "groups": {
+    "chat": {
+      "description": "일반 대화. 품질·컨텍스트 우선",
+      "deployments": [
+        {
+          "id": "chat-nemotron-3-ultra",
+          "provider": "openrouter",
+          "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+          "rpm": 6,
+          "enabled": true,
+          "note": "1M 컨텍스트"
+        },
+        {
+          "id": "chat-nemotron-3-super",
+          "provider": "openrouter",
+          "model": "nvidia/nemotron-3-super-120b-a12b:free",
+          "rpm": 6,
+          "enabled": true,
+          "note": "262K 컨텍스트"
+        },
+        {
+          "id": "chat-qwen3.8-27b",
+          "provider": "openrouter",
+          "model": "qwen/qwen3.8-27b:free",
+          "rpm": 4,
+          "enabled": true,
+          "note": "262K 컨텍스트"
+        },
+        {
+          "id": "chat-gemma-4-31b",
+          "provider": "openrouter",
+          "model": "google/gemma-4-31b-it:free",
+          "rpm": 4,
+          "enabled": true,
+          "note": "262K 컨텍스트"
+        },
+        {
+          "id": "chat-requesty-nemotron-3-ultra",
+          "provider": "requesty",
+          "model": "nvidia/nemotron-3-ultra-550b-a55b",
+          "rpm": 4,
+          "enabled": false,
+          "note": "Requesty 200 RPD. 가격 0 인지 확인 후 켤 것"
+        },
+        {
+          "id": "chat-mistral-codestral",
+          "provider": "mistral",
+          "model": "codestral-2508",
+          "rpm": 5,
+          "enabled": false,
+          "note": "경고: Mistral 기본값은 입력 학습 사용"
+        }
+      ]
+    },
+    "fast": {
+      "description": "짧은 요청(분류, 요약, 제목 생성). 응답 속도 우선",
+      "deployments": [
+        {
+          "id": "fast-nemotron-3.5-lightning",
+          "provider": "openrouter",
+          "model": "nvidia/nemotron-3.5-lightning:free",
+          "rpm": 4,
+          "enabled": true
+        },
+        {
+          "id": "fast-laguna-xs-2.1",
+          "provider": "openrouter",
+          "model": "poolside/laguna-xs-2.1:free",
+          "rpm": 3,
+          "enabled": true
+        },
+        {
+          "id": "fast-groq-gpt-oss-120b",
+          "provider": "groq",
+          "model": "openai/gpt-oss-120b",
+          "rpm": 6,
+          "maxInputTokens": 6000,
+          "enabled": false,
+          "note": "Groq 무료 8K TPM(게이트웨이 tpm 7000) → 입력 6000 토큰 초과 요청에서 제외. 켜기 전에 live 로 확인: TPM 초과가 413(rate_limit_exceeded)으로 오면 SPEC 4절상 fatal_status(즉시 실패)가 된다"
+        },
+        {
+          "id": "fast-gemini-3.5-flash-lite",
+          "provider": "gemini",
+          "model": "gemini-3.5-flash-lite",
+          "rpm": 3,
+          "enabled": false,
+          "note": "경고: Gemini 무료분은 입력 학습 사용. 켜기 전에 live 로 확인: 입력 초과 오류 문구('input token count ... exceeds the maximum')가 SPEC 4절 컨텍스트 패턴에 맞지 않으면 fatal_status 가 되어 fast→chat 컨텍스트 폴백이 안 된다"
+        }
+      ]
+    }
+  },
+  "settings": {
+    "numRetries": 3,
+    "allowedFails": 3,
+    "cooldownSeconds": 60,
+    "timeoutSeconds": 60,
+    "fallbacks": { "chat": ["fast"], "fast": ["chat"] },
+    "contextWindowFallbacks": { "fast": ["chat"] }
+  }
+}

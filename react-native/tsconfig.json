@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    // Hermes·Metro 가 그대로 읽을 수 있게 ES2019 로 내린다(# private 필드·?? 등은 변환됨).
+    "target": "ES2019",
+    // DOM·Node 타입에 기대지 않는다. fetch·AbortController·setTimeout 은 src/runtime.ts 에서 최소 타입으로 globalThis 에서 꺼낸다.
+    "lib": ["ES2019"],
+    "types": [],
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "rootDir": "src",
+    "outDir": "dist",
+    "declaration": true,
+    "sourceMap": false,
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitOverride": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": false
+  },
+  "include": ["src"]
+}
